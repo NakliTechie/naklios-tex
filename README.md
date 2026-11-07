@@ -9,7 +9,7 @@ Nothing to install. NakliOS downloads these files the first time an app compiles
 
 | Use | Where |
 |---|---|
-| In NakliOS | Call `naklios.tex.compile()` from an app; see the [app contract](https://github.com/NakliTechie/naklios/blob/main/docs/app-contract.md) |
+| In NakliOS | Call `naklios.tex.compile()` from an app; see the [app contract](https://github.com/NakliTechie/nakliOS/blob/main/docs/app-contract.md) |
 | The files | The [`engine-1.4.1` release](https://github.com/NakliTechie/naklios-tex/releases/tag/engine-1.4.1) |
 
 ## Why

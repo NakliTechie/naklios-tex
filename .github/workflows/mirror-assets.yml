@@ -28,7 +28,7 @@ jobs:
           mkdir assets
           tar xzf assets.tar.gz -C assets
           find assets -type f -printf '%s %P\n' | sort -k2
-          curl -fsSL -o ../out/texlyre-busytex-source.tar.gz "https://github.com/TeXlyre/texlyre-busytex/archive/refs/tags/v$VERSION.tar.gz"
+          curl -fsSL -o ../out/texlyre-busytex-source.tar.gz "https://github.com/TeXlyre/texlyre-busytex/archive/refs/tags/assets-v$VERSION.tar.gz"
       - name: Flatten into one folder
         run: |
           cp work/package/dist/index.js out/index.js
