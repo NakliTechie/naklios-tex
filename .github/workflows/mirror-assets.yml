@@ -1,0 +1,43 @@
+name: Mirror engine assets
+# Copies one upstream texlyre-busytex release into a release here, one file per asset, so the NakliOS
+# Worker can stream each file from GitHub. The copy runs on GitHub's servers and changes no file.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: texlyre-busytex version
+        default: 1.4.1
+        required: true
+permissions:
+  contents: write
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      VERSION: ${{ inputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch upstream package, assets and source
+        run: |
+          mkdir -p work out
+          cd work
+          npm pack "texlyre-busytex@$VERSION" --silent
+          tar xzf "texlyre-busytex-$VERSION.tgz"
+          curl -fsSL -o assets.tar.gz "https://github.com/TeXlyre/texlyre-busytex/releases/download/assets-v$VERSION/busytex-assets.tar.gz"
+          mkdir assets
+          tar xzf assets.tar.gz -C assets
+          find assets -type f -printf '%s %P\n' | sort -k2
+          curl -fsSL -o ../out/texlyre-busytex-source.tar.gz "https://github.com/TeXlyre/texlyre-busytex/archive/refs/tags/v$VERSION.tar.gz"
+      - name: Flatten into one folder
+        run: |
+          cp work/package/dist/index.js out/index.js
+          find work/assets -type f -exec cp -n {} out/ \;
+          test "$(find work/assets -type f | wc -l)" -eq "$(find out -type f ! -name index.js ! -name texlyre-busytex-source.tar.gz | wc -l)"
+          cp LICENSE NOTICE.md out/
+          (cd out && find . -type f ! -name manifest.tsv -printf '%f\t%s\t' -exec sh -c 'sha256sum "$1" | cut -d" " -f1' _ {} \; | sort > manifest.tsv)
+          cat out/manifest.tsv
+      - name: Publish the release
+        run: |
+          gh release create "engine-$VERSION" out/* --title "Engine $VERSION" \
+            --notes "Unmodified texlyre-busytex $VERSION assets, one file each. Source: texlyre-busytex-source.tar.gz in this release. Checksums: manifest.tsv."
